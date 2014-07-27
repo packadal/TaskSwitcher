@@ -6,7 +6,8 @@ SOURCES += main.cpp \
     windowmodel.cpp \
     thumbnail.cpp \
     xboxcontrolleritem.cpp \
-    desktopactions.cpp
+    desktopactions.cpp \
+    window.cpp
 
 RESOURCES += qml.qrc
 
@@ -25,4 +26,5 @@ HEADERS += \
     windowmodel.h \
     thumbnail.h \
     xboxcontrolleritem.h \
-    desktopactions.h
+    desktopactions.h \
+    window.h

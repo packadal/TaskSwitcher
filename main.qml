@@ -9,12 +9,6 @@ ApplicationWindow {
   visible: true
   width: 0;
   height: 0;
-  //  x: Screen.width/2;
-  //  y: Screen.height/2;
-  //  Behavior on x { NumberAnimation {} }
-  //  Behavior on y { NumberAnimation {} }
-  //  Behavior on width { NumberAnimation {} }
-  //  Behavior on height { NumberAnimation {} }
   flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
 
   Component.onCompleted: {
@@ -95,7 +89,7 @@ ApplicationWindow {
   Item {
     id: background
     anchors.fill: parent
-//    visible: false
+    visible: false
 
     Image {
       source: "/images/kde_air-wide.jpg"
@@ -243,129 +237,6 @@ ApplicationWindow {
             border.color: "black"
           }
 
-          //        Item {
-          //          id: selectionIndicator
-          //          clip: true
-
-          //          property int selectedIndex: test.currentIndex
-          //          onSelectedIndexChanged: {
-          //            if(index == selectedIndex)
-          //            {
-          //              width = container.width - 50
-          //              height = container.height - 50
-          //            }
-
-          //            var direction;
-
-          //            left.anchors.top = undefined
-          //            left.anchors.bottom = selectionIndicator.bottom
-
-          //            right.anchors.top = selectionIndicator.top
-          //            right.anchors.bottom = undefined
-
-          //            bottom.anchors.left = undefined
-          //            bottom.anchors.right = selectionIndicator.right
-
-          //            top.anchors.left = selectionIndicator.left
-          //            top.anchors.right = undefined
-
-          //            var previousIndex = test.previousIndexes[(test.previousIndexIndex + 1) % 2]
-
-          //            if(index === selectedIndex) {
-          //              right.height = 0;
-          //              left.height = 0;
-          //              top.width = 0;
-          //              bottom.width = 0;
-
-          //              appear.start()
-          //            }
-          //            else if(index === previousIndex) {
-          //              right.height = selectionIndicator.height;
-          //              left.height = selectionIndicator.height;
-          //              top.width = selectionIndicator.width;
-          //              bottom.width = selectionIndicator.width;
-
-          //              disappear.start()
-          //            }
-          //            else {
-          //              width = 0
-          //              height = 0
-          //            }
-          //          }
-
-          //          property int animationDuration: 100
-
-          //          SequentialAnimation {
-          //            id: disappear
-
-          //            ParallelAnimation {
-          //              NumberAnimation { target: top; property: "width"; duration: selectionIndicator.animationDuration; easing.type: Easing.Linear; to: 0 }
-          //              NumberAnimation { target: bottom; property: "width"; duration: selectionIndicator.animationDuration; easing.type: Easing.Linear; to: 0 }
-          //            }
-
-          //            ParallelAnimation {
-          //              NumberAnimation { target: left; property: "height"; duration: selectionIndicator.animationDuration; easing.type: Easing.Linear; to: 0 }
-          //              NumberAnimation { target: right; property: "height"; duration: selectionIndicator.animationDuration; easing.type: Easing.Linear; to: 0 }
-          //            }
-          //          }
-
-          //          SequentialAnimation {
-          //            id: appear
-
-          //            ParallelAnimation {
-          //              NumberAnimation { target: top; property: "width"; duration: selectionIndicator.animationDuration; easing.type: Easing.Linear; to: selectionIndicator.width }
-          //              NumberAnimation { target: bottom; property: "width"; duration: selectionIndicator.animationDuration; easing.type: Easing.Linear; to: selectionIndicator.width }
-          //            }
-
-          //            ParallelAnimation {
-          //              NumberAnimation { target: left; property: "height"; duration: selectionIndicator.animationDuration; easing.type: Easing.Linear; to: selectionIndicator.height }
-          //              NumberAnimation { target: right; property: "height"; duration: selectionIndicator.animationDuration; easing.type: Easing.Linear; to: selectionIndicator.height }
-          //            }
-          //          }
-
-          //          anchors.centerIn: parent
-          //          width: 0
-          //          height: 0
-
-          //          property int thickness: 2
-
-          //          Rectangle {
-          //            id: top
-          //            width: parent.width
-          //            height: selectionIndicator.thickness
-          //            anchors.top: parent.top
-          //            anchors.left: parent.left
-          //            color: "black"
-          //          }
-
-          //          Rectangle {
-          //            id: bottom
-          //            width: parent.width
-          //            height: selectionIndicator.thickness
-          //            anchors.bottom: parent.bottom
-          //            anchors.left: parent.left
-          //            color: "black"
-          //          }
-
-          //          Rectangle {
-          //            id: left
-          //            width: selectionIndicator.thickness
-          //            height: parent.height
-          //            anchors.left: parent.left
-          //            anchors.bottom: parent.bottom
-          //            color: "black"
-          //          }
-
-          //          Rectangle {
-          //            id: right
-          //            width: selectionIndicator.thickness
-          //            height: parent.height
-          //            anchors.right: parent.right
-          //            anchors.bottom: parent.bottom
-          //            color: "black"
-          //          }
-          //        }
-
           Thumbnail {
             window: handle
             width: outline.width - 100
@@ -394,13 +265,13 @@ ApplicationWindow {
       }
     }
   }
-//  GaussianBlur {
-//    anchors.fill: background
-//    source: background
-//    radius: (rightTriggerMenu.enabled || leftTriggerMenu.enabled) ? 16 : 0
-//    Behavior on radius { NumberAnimation {} }
-//    samples: 16
-//  }
+  GaussianBlur {
+    anchors.fill: background
+    source: background
+    radius: (rightTriggerMenu.enabled || leftTriggerMenu.enabled) ? 16 : 0
+    Behavior on radius { NumberAnimation {} }
+    samples: 16
+  }
 
   CircularMenu {
     id: rightTriggerMenu

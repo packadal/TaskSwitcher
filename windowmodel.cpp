@@ -19,6 +19,10 @@
 
 static int indexIndirection[9] = {5, 3, 7, 1, 0, 2, 6, 4, 8};
 
+const std::function<bool(Window *first, Window *second)> WindowModel::WindowComparator = [](Window *first, Window *second) {
+  return first->executionCount() > second->executionCount();
+};
+
 BOOL IsAltTabWindow(HWND hwnd)
 {
  // Start at the root owner
@@ -349,15 +353,12 @@ Window *WindowModel::setActiveWindow(HWND handle)
 Window* WindowModel::addWindow(Window* w)
 {
   m_windows.append(w);
-  WindowComparator c(this);
-  qSort(m_windows.begin(), m_windows.end(), c);
+  std::sort(m_windows.begin(), m_windows.end(), WindowComparator);
   return w;
 }
 
 Window *WindowModel::addWindow(HWND handle)
 {
-  WindowComparator c(this);
-
   int index = indexOfWindow(executableName(handle));
   if(index >= 0 && index < m_windows.length())
   {
@@ -371,7 +372,7 @@ Window *WindowModel::addWindow(HWND handle)
   Window* w = new Window(handle);
   w->setRunning(handle);
   m_windows.append(w);
-  qSort(m_windows.begin(), m_windows.end(), c);
+  std::sort(m_windows.begin(), m_windows.end(), WindowComparator);
 
   return w;
 }
@@ -415,28 +416,4 @@ void WindowModel::focusWindow(HWND handle)
 
   ShowWindow(handle, SW_SHOWMAXIMIZED );
   SetForegroundWindow(handle);
-}
-
-void Window::start()
-{
-  if(isRunning())
-    return;
-
-  QString operation("open");
-  ShellExecuteW(NULL,
-               operation.toStdWString().c_str(),
-               m_executablePath.toStdWString().c_str(),
-               NULL,
-               NULL,
-                SW_SHOWDEFAULT);
-}
-
-void Window::setFocus()
-{
-  WindowModel::focusWindow(m_handle);
-}
-
-void Window::close()
-{
-  SendMessage(m_handle, WM_CLOSE, 0, 0);
 }

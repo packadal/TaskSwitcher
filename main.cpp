@@ -42,17 +42,5 @@ int main(int argc, char *argv[])
 
   engine.load(QUrl(QStringLiteral("qrc:///main.qml")));
 
-  QList<QObject*> objs = engine.rootObjects();
-  if(objs.length() > 0)
-  {
-    Thumbnail::m_qwindow = qobject_cast<QWindow*>(objs[0]);
-  }
-  else
-  {
-    QMessageBox::information(NULL, "DAMN", "no root objects");
-    qWarning() << "DAMN";
-    return 0;
-  }
-
   return app.exec();
 }

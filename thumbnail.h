@@ -15,11 +15,10 @@ class Thumbnail : public QQuickPaintedItem
 public:
   explicit Thumbnail(QQuickItem *parent = 0);
 
-  static QWindow* m_qwindow;
-
 public slots:
   void paint(QPainter *painter);
-//  QSGNode* updatePaintNode(QSGNode *parent, UpdatePaintNodeData *);
+
+  void updateThumbnail();
 
   Window* window() const {
     return m_window;
@@ -36,6 +35,7 @@ signals:
   void windowChanged();
 
 private:
+  QImage m_image;
   Window* m_window;
 };
 
