@@ -48,13 +48,19 @@ Item {
     id: focusIndicator
     anchors.fill: parent
     angle: -triggerMenu.angle + 90
+    property bool active: triggerMenu.angle >= 0
     gradient: Gradient {
-      GradientStop { position: 0.0; color: Qt.lighter("lightgray", 0.2) }
+      GradientStop { position: 0.0; color: focusIndicator.active ? Qt.lighter("lightgray", 0.2) : "transparent"
+        Behavior on color { ColorAnimation {} } }
       GradientStop { position: 0.1; color: "transparent" }
       GradientStop { position: 0.9; color: "transparent" }
-      GradientStop { position: 1.0; color: Qt.lighter("lightgray", 0.2) }
+      GradientStop { position: 1.0; color: focusIndicator.active ? Qt.lighter("lightgray", 0.2) : "transparent"
+        Behavior on color { ColorAnimation {} } }
     }
+
+
     source: background
+//    visible: triggerMenu.angle >= 0
   }
 
   Repeater {
@@ -106,7 +112,7 @@ Item {
             GradientStop { position: 0.2; color: "white" }
             GradientStop { position: 0.5; color: "transparent" }
           }
-          visible: modelData.isRunning()
+          visible: modelData.isRunning
 
           SequentialAnimation {
             id: highlightAnimation

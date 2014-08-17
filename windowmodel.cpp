@@ -51,6 +51,8 @@ BOOL CALLBACK Callback(HWND hwnd, long int windowModelPointer)
 //  if(IsWindow(hwnd) && (GetWindowLongA(hwnd, GWL_STYLE) & TARGETWINDOW) == TARGETWINDOW)
   if(IsAltTabWindow(hwnd))
   {
+    qWarning() << "# " << WindowModel::executableName(hwnd);
+
     WindowModel* model = (WindowModel*)windowModelPointer;
     model->addWindow(hwnd);
   }
@@ -106,9 +108,9 @@ QString rot13(const QString cypher)
   return result;
 }
 
-QList<Window *> WindowModel::pinnedWindows()
+QVariantList WindowModel::pinnedWindows()
 {
-  QList<Window*> result;
+  QVariantList result;
 
   IKnownFolder *folder = NULL;
   IKnownFolderManager* mgr = NULL;
@@ -135,7 +137,9 @@ QList<Window *> WindowModel::pinnedWindows()
     else
       w = new Window(exePath, 0, 0);
 
-    result << w;
+    QVariant v;
+    v.setValue(w);
+    result << v;
   }
 
   return result;
@@ -276,47 +280,6 @@ WindowModel::WindowModel()
 //                                                   WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS );
 }
 
-int WindowModel::rowCount(const QModelIndex &) const
-{
-  return 9;
-}
-
-int WindowModel::columnCount(const QModelIndex &) const
-{
-  return 1;
-}
-
-QVariant WindowModel::data(const QModelIndex &index, int role) const
-{
-  QVariant v;
-  int currentIndex = index.row();
-  while(indexIndirection[currentIndex] >= m_windows.length())
-    currentIndex--;
-
-  Window* w = m_windows[indexIndirection[currentIndex]];
-
-  if(role == TitleRole)
-    v.setValue(w->title());
-  else if(role == IconPathRole)
-  {
-    v.setValue(w->iconPath());
-  }
-  else if(role == HandleRole)
-    v.setValue(w);
-
-  return v;
-}
-
-QHash<int, QByteArray> WindowModel::roleNames() const
-{
-  QHash<int, QByteArray> roles;
-  roles[TitleRole] = "title";
-  roles[HandleRole] = "handle";
-  roles[IconPathRole] = "icon";
-
-  return roles;
-}
-
 QString WindowModel::executableName(HWND handle)
 {
   TCHAR fileName[MAX_PATH] = {0};
@@ -331,7 +294,9 @@ QString WindowModel::executableName(HWND handle)
 
 int WindowModel::indexOfWindow(const QString& executableName)
 {
+  qWarning() << "looking for: " << executableName;
   for(int i = 0; i < m_windows.length(); ++i) {
+    qWarning() << m_windows[i]->executableName();
     if(m_windows[i]->executableName() == executableName) {
       return i;
     }
@@ -389,31 +354,21 @@ void WindowModel::removeWindow(HWND handle)
 
 void WindowModel::focusAndUpdate()
 {
-//  if(Thumbnail::m_qwindow)
-//  {
-//    HWND hwnd = (HWND)QGuiApplication::platformNativeInterface()->nativeResourceForWindow(QByteArrayLiteral("handle"), Thumbnail::m_qwindow);
-//    focusWindow(hwnd);
-//  }
+  qWarning() << "ALT-TAB";
   EnumWindows(Callback, (long int)this);
 }
 
-void WindowModel::focusWindow(HWND handle)
+QVariantList WindowModel::windows()
 {
-  HWND currentForegroundWindow = GetForegroundWindow();
-  DWORD pid;
-  GetWindowThreadProcessId(currentForegroundWindow, &pid);
-
-  DWORD myPid;
-  GetWindowThreadProcessId(handle, &myPid);
-
-  if(pid != myPid)
+  QVariantList list;
+  for(int i = 0; i < 9; ++i)
   {
-    AttachThreadInput(myPid, pid, TRUE);
-    AllowSetForegroundWindow(ASFW_ANY);
-
-    AttachThreadInput(myPid, pid, FALSE);
+    QVariant temp;
+    int currentIndex = i;
+    while(indexIndirection[currentIndex] >= m_windows.length())
+      currentIndex--;
+    temp.setValue(m_windows[indexIndirection[currentIndex]]);
+    list << temp;
   }
-
-  ShowWindow(handle, SW_SHOWMAXIMIZED );
-  SetForegroundWindow(handle);
+  return list;
 }

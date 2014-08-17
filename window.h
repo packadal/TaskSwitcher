@@ -9,6 +9,7 @@ class Window : public QObject {
   Q_OBJECT
   Q_PROPERTY(QString title READ title NOTIFY titleChanged)
   Q_PROPERTY(QString iconPath READ iconPath NOTIFY iconPathChanged)
+  Q_PROPERTY(bool isRunning READ isRunning NOTIFY runningChanged)
 public:
   Window();
 
@@ -64,10 +65,11 @@ public:
     return m_focusTime;
   }
 
-public slots:
   bool isRunning() const {
     return m_handle != nullptr;
   }
+
+public slots:
 
   void start();
 
@@ -78,6 +80,7 @@ public slots:
 signals:
   void titleChanged();
   void iconPathChanged();
+  void runningChanged();
 
 private:
   QString m_title;

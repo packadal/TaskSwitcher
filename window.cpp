@@ -2,6 +2,7 @@
 
 #include "windowmodel.h"
 
+#include <qdebug.h>
 Window::Window()
   : thumbnailId(nullptr),
     m_handle(nullptr),
@@ -44,10 +45,13 @@ Window::Window(HWND handle)
   m_executablePath = WindowModel::executableName(handle);
 }
 
+#include <qdebug.h>
 void Window::setRunning(HWND handle)
 {
+
   m_handle = handle;
   m_executionCount += 1000;
+  runningChanged();
 }
 
 void Window::start()
@@ -66,10 +70,28 @@ void Window::start()
 
 void Window::setFocus()
 {
-  WindowModel::focusWindow(m_handle);
+  HWND currentForegroundWindow = GetForegroundWindow();
+  DWORD pid;
+  GetWindowThreadProcessId(currentForegroundWindow, &pid);
+
+  DWORD myPid;
+  GetWindowThreadProcessId(m_handle, &myPid);
+
+  if(pid != myPid)
+  {
+    AttachThreadInput(myPid, pid, TRUE);
+    AllowSetForegroundWindow(ASFW_ANY);
+
+    AttachThreadInput(myPid, pid, FALSE);
+  }
+
+  ShowWindow(m_handle, SW_SHOWMAXIMIZED );
+  SetForegroundWindow(m_handle);
 }
 
 void Window::close()
 {
   SendMessage(m_handle, WM_CLOSE, 0, 0);
+  m_handle = nullptr;
+  runningChanged();
 }

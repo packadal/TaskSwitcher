@@ -14,33 +14,14 @@
 #include "window.h"
 
 class WindowIconImageProvider;
-class WindowComparator;
 
-class WindowModel : public QAbstractListModel {
+class WindowModel : public QObject {
   friend class WindowIconImageProvider;
-  friend class WindowComparator;
   Q_OBJECT
 public:
-
-  QList<Window*> pinnedWindows();
   static QString resolveLink(const QString linkPath);
 
   WindowModel();
-
-  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-
-  QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-
-  virtual QHash<int,QByteArray> roleNames() const;
-
-  enum WindowRoles {
-    TitleRole = Qt::UserRole + 1,
-    HandleRole,
-    IconRole,
-    IconPathRole,
-    IdentifierRole
-  };
 
   Window* WindowModel::getWindowByExecutableName(const QString executableName);
   static QString executableName(HWND handle);
@@ -52,9 +33,10 @@ public:
   Window* addWindow(Window* w);
   void removeWindow(HWND handle);
 
-  static void focusWindow(HWND);
-
 public slots:
+  QVariantList pinnedWindows();
+  QVariantList windows();
+
   void focusAndUpdate();
 
 private:

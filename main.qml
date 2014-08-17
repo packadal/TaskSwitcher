@@ -13,7 +13,7 @@ ApplicationWindow {
 
   Component.onCompleted: {
     width = Screen.desktopAvailableWidth
-    height = Screen.height
+    height = Screen.height - 1 //without this '-1' the app does not hide properly
     x = 0
     y = 0
   }
@@ -23,9 +23,9 @@ ApplicationWindow {
 
     onGuideChanged: {
       if(guide) {
-        mainWindow.visible = !mainWindow.visible;
-        if(mainWindow.visible)
+        if(!mainWindow.visible)
           windowList.focusAndUpdate()
+        mainWindow.visible = !mainWindow.visible;
       }
     }
 
@@ -58,8 +58,8 @@ ApplicationWindow {
           return;
         }
 
-        var activeWindow = test.currentItem.children[1].window;
-        if(activeWindow.isRunning())
+        var activeWindow = test.model[test.currentIndex];
+        if(activeWindow.isRunning)
           activeWindow.setFocus()
         else
           activeWindow.start()
@@ -75,10 +75,9 @@ ApplicationWindow {
         return;
       }
 
-      var activeWindow = test.currentItem.children[1].window;
-      if(activeWindow.isRunning())
+      var activeWindow = test.model[test.currentIndex];
+      if(activeWindow.isRunning)
         activeWindow.close()
-      mainWindow.hide();
     }
   }
 
@@ -126,7 +125,7 @@ ApplicationWindow {
           anchors.verticalCenter: parent.verticalCenter
           anchors.left: parent.left
           anchors.leftMargin: 16
-          text: clock.hours
+          text: (clock.hours < 10 ? "0" : "") + clock.hours
           font.pixelSize: 80
           color: "white"
         }
@@ -145,7 +144,7 @@ ApplicationWindow {
           anchors.verticalCenter: parent.verticalCenter
           anchors.left: separator.right
           anchors.leftMargin: 16
-          text: clock.minutes
+          text: (clock.minutes < 10 ? "0" : "") + clock.minutes
           font.pixelSize: hoursDisplay.font.pixelSize
           font.family: hoursDisplay.font.family
           color: hoursDisplay.color
@@ -204,7 +203,7 @@ ApplicationWindow {
         anchors.verticalCenterOffset: parent.height * 1 /16
         cellWidth: width/3
         cellHeight: height/3
-        model: windowList
+        model: windowList.windows()
         currentIndex: 4
 
         property int previousIndexIndex: -1
@@ -222,7 +221,7 @@ ApplicationWindow {
           width: test.cellWidth
           height: test.cellHeight
 
-          property bool focused: test.currentIndex == index
+          property bool focused: test.currentIndex === index
 
           Rectangle {
             id: outline
@@ -231,35 +230,83 @@ ApplicationWindow {
             height: container.height - (container.focused ? 0 : 50)
             Behavior on width { NumberAnimation {} }
             Behavior on height { NumberAnimation {} }
-            color: (container.focused ? "gray" : "lightgray")
-            Behavior on color { ColorAnimation {} }
             border.width: 1
             border.color: "black"
+            Behavior on color { ColorAnimation {} }
+            color: "lightgray"
+            visible: false
+          }
+          Glow {
+            opacity: container.focused ? 0.8 : 0.5
+            Behavior on opacity { NumberAnimation {} }
+            anchors.fill: outline
+            source: outline
+            radius: 16//container.focused ? 16 : 0
+            samples: 16//container.focused ? 16 : 0
+//            transparentBorder: true
           }
 
           Thumbnail {
-            window: handle
+            window: modelData
             width: outline.width - 100
             height: outline.height - 50
             anchors.centerIn: parent
 
-            Text {
-              anchors.horizontalCenter: parent.horizontalCenter
-              anchors.top: parent.bottom
-              text: title
-              font.pixelSize: 10
-              color: "black"
-            }
             Image {
               id: windowIcon
               anchors.horizontalCenter: parent.horizontalCenter
-              anchors.verticalCenter: handle.isRunning() ? parent.bottom : parent.verticalCenter
-              anchors.verticalCenterOffset: handle.isRunning() ? height : 0
-              //            anchors.top: handle.isRunning() ? parent.bottom : parent.verticalCenter
-              source: icon
-              width: handle.isRunning() ? 30 : outline.height - 50
-              height: handle.isRunning() ? 30 : outline.height - 50
+              anchors.verticalCenter: parent.verticalCenter
+              anchors.verticalCenterOffset: 0
+              source: modelData.iconPath
+              width: outline.height - 50
+              height: outline.height - 50
+              visible: false
             }
+            Glow {
+              anchors.fill: windowIcon
+              source: windowIcon
+              radius: container.focused ? 16 : 0
+              samples: container.focused ? 16 : 0
+              transparentBorder: true
+              visible: !modelData.isRunning
+            }
+
+            Item {
+              anchors.top: parent.bottom
+              anchors.horizontalCenter: parent.horizontalCenter
+              width: title.width + windowRunningIcon.width + 16
+              height: Math.max(title.height, windowRunningIcon.height)
+
+              Image {
+                id: windowRunningIcon
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+                source: modelData.iconPath
+                width: 30
+                height: 30
+                visible: false
+              }
+              Glow {
+                anchors.fill: windowRunningIcon
+                source: windowRunningIcon
+                radius: container.focused ? 16 : 0
+                samples: container.focused ? 16 : 0
+                transparentBorder: true
+                visible: modelData.isRunning
+              }
+              Text {
+                id: title
+                anchors.left: modelData.isRunning ? windowRunningIcon.right : undefined
+                anchors.horizontalCenter: modelData.isRunning ? undefined : parent.horizontalCenter
+                anchors.leftMargin: 16
+                anchors.verticalCenter: windowRunningIcon.verticalCenter
+                text: modelData.title
+                font.pixelSize: 15
+                color: "black"
+              }
+            }
+
+
           }
         }
       }
@@ -283,7 +330,7 @@ ApplicationWindow {
         function activate() {
           desktop.shutdown()
         }
-        function isRunning() { return false; }
+        property bool isRunning: false
       }
       Item {
         property string title: "Reboot"
@@ -291,7 +338,7 @@ ApplicationWindow {
         function activate() {
           desktop.restart()
         }
-        function isRunning() { return false; }
+        property bool isRunning: false
       }
       Item {
         property string title: "Exit"
@@ -299,7 +346,7 @@ ApplicationWindow {
         function activate() {
           mainWindow.close()
         }
-        function isRunning() { return false; }
+        property bool isRunning: false
       }
     }
 
@@ -316,14 +363,14 @@ ApplicationWindow {
 
   CircularMenu {
     id: leftTriggerMenu
-    model:  pinnedApplications
+    model:  windowList.pinnedWindows()
     angle: ctrl.leftStickAngle
     anchors.horizontalCenterOffset: -400
 
     function activate()
     {
       var activeWindow = leftTriggerMenu.model[activeIndex];
-      if(activeWindow.isRunning())
+      if(activeWindow.isRunning)
         activeWindow.setFocus()
       else
         activeWindow.start()

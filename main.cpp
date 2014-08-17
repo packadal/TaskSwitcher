@@ -29,15 +29,6 @@ int main(int argc, char *argv[])
   v.setValue(windowModel);
   engine.rootContext()->setContextProperty("windowList", v);
 
-  QVariantList v2;
-  for(Window* w : windowModel->pinnedWindows())
-  {
-    QVariant temp;
-    temp.setValue(w);
-    v2 << temp;
-  }
-  engine.rootContext()->setContextProperty("pinnedApplications", v2);
-
   engine.addImageProvider(QLatin1String("icons"), new WindowIconImageProvider);
 
   engine.load(QUrl(QStringLiteral("qrc:///main.qml")));
